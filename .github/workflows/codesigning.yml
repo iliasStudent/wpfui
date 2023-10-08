@@ -1,0 +1,34 @@
+name: Code Sign
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up private key
+        env:
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+        run: |
+          # Save the private key to a file
+          echo "${PRIVATE_KEY}" > private_key.pem
+          chmod 600 private_key.pem
+
+      - name: Code signing
+        run: |
+          # Sign your code using the private key
+          # Example: codesign -s "YourKeyName" /path/to/your/app
+          for file in /src/*; do
+            if [ -f "$file" ]; then
+              codesign -s "PRIVATE_KEY" "$file"
+            fi
+          done
+
+# Add more steps as needed for your specific build and code signing process
