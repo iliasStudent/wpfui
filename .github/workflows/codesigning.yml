@@ -14,8 +14,6 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Set up private key
-        env:
-          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
         run: |
           # Save the private key to a file
           echo "${PRIVATE_KEY}" > private_key.pem
@@ -27,7 +25,7 @@ jobs:
           # Example: codesign -s "YourKeyName" /path/to/your/app
           for file in /src/*; do
             if [ -f "$file" ]; then
-              codesign -s "PRIVATE_KEY" "$file"
+              codesign -s "${{ secrets.PRIVATE_KEY }}" "$file"
             fi
           done
 
