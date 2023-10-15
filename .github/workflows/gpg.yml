@@ -14,17 +14,10 @@ jobs:
       - name: Install GPG
         run: sudo apt-get install gnupg
       - name: Import GPG key
-        run: echo "${{ secrets.PRIVATE_KEY }}" | base64 --decode | gpg --import
-      - name: Set up Node.js environment
-        uses: actions/setup-node@v2.4.0
-        with:
-          node-version: '14.x'
-      - name: Set GPG key ID
+        run: echo "${{ secrets.SIGNING_KEY }}" | base64 --decode | gpg --import
+      - name: Sign source code
         run: |
-          export GPG_KEY_ID=$(gpg --list-secret-keys --keyid-format LONG | awk '$1 == "sec:" {print $2}' | cut -d '/' -f 2)
-          echo "::set-env name=GPG_KEY_ID::$GPG_KEY_ID"
-      - name: Sign commit
-        run: |
-          git config --global user.signingkey ${{ env.GPG_KEY_ID }}
-          git commit -S -m "Signed commit"
+          find . -type f -name '*.cs' -exec gpg --yes --detach-sign --armor {} \;
+          git add .
+          git commit -m "Signed source code"
           git push origin HEAD
